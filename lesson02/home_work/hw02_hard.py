@@ -42,7 +42,7 @@ try:
     year_is_valid = True if 1 <= int(year) <= 9999 else False
 
     day_31 = True if 1 <= int(day) <= 31 and int(month) in [1, 3, 5, 7, 8, 10, 12] else False
-    day_30 = True if 1 <= int(day) <= 31 and int(month) not in [1, 3, 5, 7, 8, 10, 12] else False
+    day_30 = True if 1 <= int(day) <= 30 and int(month) not in [1, 3, 5, 7, 8, 10, 12] else False
 
     day_is_valid = True if day_30 or day_31 else False
 
@@ -88,27 +88,25 @@ except IndexError:
 # Вход: 11
 # Выход: 5 3
 
+def find_room(room_number):
+    floor = 1  # Номер этажа
+    tmp_room_number = 1  # Временная переменная для хранения сквозного номера комнаты
+    floor_tmp_max = 1  # Количество комнат на этаже
+
+    while True:
+        for floor_tmp in range(1, floor_tmp_max + 1):  # Перебираем этажи с одинаковой вместимостью
+            for room in range(1, floor_tmp_max + 1):  # Перебираем комнаты на этаже
+                if tmp_room_number >= room_number:
+                    return floor, room
+                tmp_room_number += 1  # Увеличиваем сквозной счётчик комнат
+            floor += 1  # Добавляем этаж
+        floor_tmp_max += 1  # Увеличиваем вместимость этажа
+
+
 try:
     room_number = int(input("Введите номер комнаты: "))
-    if 0 < room_number < 2000000000:
-        floor = 1  # Номер этажа
-        tmp_room_number = 1  # Временная переменная для хранения номера комнаты на этаже
-        floor_tmp_max = 1  # Количество комнат на этаже
-
-        while True:
-            for floor_tmp in range(1, floor_tmp_max + 1):
-                room = 1  # Номер комнаты на этаже
-                for room_tmp in range(1, floor_tmp_max + 1):
-                    room += 1
-                    tmp_room_number += 1
-                    if tmp_room_number >= room_number:
-                        break
-                if tmp_room_number >= room_number:
-                    break
-                floor += 1
-            floor_tmp_max += 1
-            if tmp_room_number >= room_number:
-                break
+    if 1 <= room_number <= 2000000000:
+        floor, room = find_room(room_number)
         print(f"Вход: {room_number}")
         print(f"Выход: {floor} {room}")
     else:
