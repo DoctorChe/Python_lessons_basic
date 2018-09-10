@@ -1,10 +1,19 @@
 # Задание-1: уравнение прямой вида y = kx + b задано в виде строки.
 # Определить координату y точки с заданной координатой x.
 
-equation = 'y = -12x + 11111140.2121'
-x = 2.5
+# equation = 'y = -12x + 11111140.2121'
+# x = 2.5
 # вычислите и выведите y
 
+import re
+
+try:
+    equation = input("Введите уравнение прямой вида y = kx + b: ")
+    k, b = [float(x) for x in re.split(r'y|x|=|\+|-$| ', equation) if len(x) > 0]  # Парсим коэффициенты k и b
+    x = float(input("Введите значение x: "))
+    print(f"Координата y = {k * x + b}")
+except ValueError:
+    print("Вы ввели неверные данные")
 
 # Задание-2: Дата задана в виде строки формата 'dd.mm.yyyy'.
 # Проверить, корректно ли введена дата.
@@ -17,12 +26,36 @@ x = 2.5
 #  (т.е. 2 символа для дня, 2 - для месяца, 4 - для года)
 
 # Пример корректной даты
-date = '01.11.1985'
+# date = '01.11.1985'
 
 # Примеры некорректных дат
-date = '01.22.1001'
-date = '1.12.1001'
-date = '-2.10.3001'
+# date = '01.22.1001'
+# date = '1.12.1001'
+# date = '-2.10.3001'
+
+date = input("Введите дату в формате dd.mm.yyyy: ")
+try:
+    day, month, year = re.findall(r'(\d{2}).(\d{2}).(\d{4})', date)[0]
+
+    month_is_valid = True if 1 <= int(month) <= 12 else False
+
+    year_is_valid = True if 1 <= int(year) <= 9999 else False
+
+    day_31 = True if 1 <= int(day) <= 31 and int(month) in [1, 3, 5, 7, 8, 10, 12] else False
+    day_30 = True if 1 <= int(day) <= 31 and int(month) not in [1, 3, 5, 7, 8, 10, 12] else False
+
+    day_is_valid = True if day_30 or day_31 else False
+
+    if day_is_valid and month_is_valid and year_is_valid:
+        print("Данные введены корректно")
+    else:
+        print("Вы ввели неверные данные")
+except ValueError:
+    print("Вы ввели неверные данные")
+except KeyError:
+    print("Вы ввели неверные данные")
+except IndexError:
+    print("Вы ввели неверные данные")
 
 
 # Задание-3: "Перевёрнутая башня" (Задача олимпиадного уровня)
@@ -54,3 +87,31 @@ date = '-2.10.3001'
 #
 # Вход: 11
 # Выход: 5 3
+
+try:
+    room_number = int(input("Введите номер комнаты: "))
+    if 0 < room_number < 2000000000:
+        floor = 1  # Номер этажа
+        tmp_room_number = 1  # Временная переменная для хранения номера комнаты на этаже
+        floor_tmp_max = 1  # Количество комнат на этаже
+
+        while True:
+            for floor_tmp in range(1, floor_tmp_max + 1):
+                room = 1  # Номер комнаты на этаже
+                for room_tmp in range(1, floor_tmp_max + 1):
+                    room += 1
+                    tmp_room_number += 1
+                    if tmp_room_number >= room_number:
+                        break
+                if tmp_room_number >= room_number:
+                    break
+                floor += 1
+            floor_tmp_max += 1
+            if tmp_room_number >= room_number:
+                break
+        print(f"Вход: {room_number}")
+        print(f"Выход: {floor} {room}")
+    else:
+        print("Вы ввели неверные данные")
+except ValueError:
+    print("Вы ввели неверные данные")
