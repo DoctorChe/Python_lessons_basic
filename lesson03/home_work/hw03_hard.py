@@ -198,12 +198,3 @@ try:
 except FileExistsError:
     with open(path, "x", encoding='UTF-8') as f:
         f.write(fruit)
-
-letters = list(map(chr, range(ord('А'), ord('Я')+1)))
-print(list(map(chr, range(ord('А'), ord('Я')+1))))
-lists = {letter: words for letter, words in zip(letters, [word for word in fruits if word[0] == letter])}
-words = [word for word in fruits if word[0] == letter]
-lists = {letter: words for letter, words in zip(letters, [word for word in fruits if word[0] == letter])}
-
-dict = {letter: words for letter, words in zip(letters, [1])}
-print(dict)
