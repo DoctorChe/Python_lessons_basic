@@ -2,8 +2,27 @@
 # Напишите функцию, возвращающую ряд Фибоначчи с n-элемента до m-элемента.
 # Первыми элементами ряда считать цифры 1 1
 
+
 def fibonacci(n, m):
-    pass
+
+    def fib(n):
+        """
+        Вычисление числа Фибоначчи
+        :param n: Порядковый номер в последовательности
+        :return: Число Фибоначчи
+        """
+        # Два первых элемента ряда
+        cache1 = 1
+        cache2 = 1
+        for _ in range(2, n):
+            cache1, cache2 = cache2, cache1 + cache2
+
+        return cache2
+
+    return [fib(x) for x in range(n, m+1)]
+
+
+print(fibonacci(10, 15))
 
 # Задача-2:
 # Напишите функцию, сортирующую принимаемый список по возрастанию.
@@ -11,17 +30,46 @@ def fibonacci(n, m):
 # Для решения данной задачи нельзя использовать встроенную функцию и метод sort()
 
 
-def sort_to_max(origin_list):
-    pass
+def sort_to_max(lst):
+    n = len(lst)
+    m = n - 1
+    while m > 0:
+        for i in range(m):
+            if lst[i] > lst[i + 1]:
+                x = lst[i]
+                lst[i] = lst[i + 1]
+                lst[i + 1] = x
+        m = m - 1
+    return lst
 
-sort_to_max([2, 10, -12, 2.5, 20, -11, 4, 4, 0])
+
+# sort_to_max([2, 10, -12, 2.5, 20, -11, 4, 4, 0])
+print(sort_to_max([2, 10, -12, 2.5, 20, -11, 4, 4, 0]))
 
 # Задача-3:
 # Напишите собственную реализацию стандартной функции filter.
 # Разумеется, внутри нельзя использовать саму функцию filter.
 
 
+def my_filter(foo, lst):
+    return [x for x in lst if foo(x)]
+
+
+my_foo = lambda x: x > 0
+my_lst = [-2, 1, 0, -5, 8]
+print(my_filter(my_foo, my_lst))
+
 # Задача-4:
 # Даны четыре точки А1(х1, у1), А2(x2 ,у2), А3(x3 , у3), А4(х4, у4).
 # Определить, будут ли они вершинами параллелограмма.
 
+# Задача 4 (альтернативная):
+# Напишите функцию, которая считает сумму квадратов от своих аргументов.
+# Кол-во аргументов функции может быть любым.
+
+
+def sum_of_squares(*args):
+    return sum(x*x for x in args)
+
+
+print(sum_of_squares(1, 2, 3))
