@@ -13,3 +13,40 @@
 # Для решения данной задачи используйте алгоритмы из задания easy,
 # оформленные в виде соответствующих функций,
 # и импортированные в данный файл из easy.py
+
+
+import sys
+import os
+import hw05_easy
+
+try:
+    pass
+except ValueError:
+    pass
+
+while True:
+    menu = "Выберите действие:\n \
+        1 - Перейти в папку\n \
+        2 - Просмотреть содержимое текущей папки\n \
+        3 - Удалить папку\n \
+        4 - Создать папку\n \
+        q - Выход \n"
+    key = input(menu)
+
+    if key == 'q':
+        sys.exit()  # Вызов данной функции мгновенно завершает работу модуля (скрипта)
+    elif key == '1':
+        dir_name = input("Введите им директории: ")
+        try:
+            os.chdir(dir_name)
+            print("Успешно перешел")
+        except FileNotFoundError:
+            print(f"Невозможно перейти")
+    elif key == 2:
+        hw05_easy.list_current_dir()
+    elif key == 3:
+        pass
+    elif key == 4:
+        pass
+    else:
+        print("Неверная команда")
