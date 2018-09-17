@@ -6,30 +6,32 @@
 import os
 
 
-def make_dirs():
-    for i in range(1, 10):
-        dir_path = os.path.join(os.getcwd(), f'dir_{i}')
-        try:
-            # Создаем новую директорию
-            os.mkdir(dir_path)
-            print(f'Создана директория: {dir_path}')
-        except FileExistsError:
-            print(f'Такая директория уже существует: {dir_path}')
+def make_dir(dir_name):
+    """
+    Создаёт новую директорию с именем dir_name в текущей директории
+    :param dir_name: имя новой директории
+    :return: True - успешно, False - завершилось ошибкой
+    """
+    dir_path = os.path.join(os.getcwd(), dir_name)
+    try:
+        os.mkdir(dir_path)
+        return True
+    except FileExistsError:
+        return False
 
 
-def remove_dirs():
-    for i in range(1, 10):
-        dir_path = os.path.join(os.getcwd(), f'dir_{i}')
-        try:
-            # Удаляем существующую пустую директорию
-            os.rmdir(dir_path)
-            print(f'Удалена директория: {dir_path}')
-        except FileNotFoundError:
-            print(f'Такой директории не существует: {dir_path}')
-
-
-make_dirs()
-remove_dirs()
+def remove_dir(dir_name):
+    """
+    Удаляет директорию с именем dir_name в текущей директории
+    :param dir_name: имя директории для удаления
+    :return: True - успешно, False - завершилось ошибкой
+    """
+    dir_path = os.path.join(os.getcwd(), dir_name)
+    try:
+        os.rmdir(dir_path)
+        return True
+    except FileNotFoundError:
+        return False
 
 
 # Задача-2:
@@ -37,26 +39,53 @@ remove_dirs()
 
 def list_current_dir():
     files = os.listdir(path=os.getcwd())
-    print(f'Список файлов в текущей директории:')
+    print("Список файлов в текущей директории:")
     for file in files:
         print(file)
-
-
-list_current_dir()
 
 
 # Задача-3:
 # Напишите скрипт, создающий копию файла, из которого запущен данный скрипт.
 
 def copy_current_script():
-    global file_path
+    """
+    Создаёт копию файла, из которого запущен данный скрипт
+    :return: True - успешно, False - завершилось ошибкой
+    """
+
+    import inspect, os
+    print(inspect.getfile(inspect.currentframe()))
+
     import shutil
     try:
-        file_path = os.path.join(os.getcwd(), f'copy_{os.path.basename(__file__)}')
-        shutil.copyfile(__file__, file_path)
-        print(f'Создана копия файла: {file_path}')
+        file_path = os.getcwd()
+        file_name = f"copy_{os.path.basename(__file__)}"
+        file_full_name = os.path.join(file_path, file_name)
+        shutil.copyfile(__file__, file_full_name)
+        return True
     except Exception:
-        print('Что-то пошло не так')
+        return False
 
 
-copy_current_script()
+if __name__ == "__main__":
+
+    for i in range(1, 10):
+        dir_name = f"dir_{i}"
+        if make_dir(f"dir_{i}"):
+            print(f"Создана директория: {dir_name}")
+        else:
+            print(f"Такая директория уже существует: {dir_name}")
+
+    for i in range(1, 10):
+        dir_name = f"dir_{i}"
+        if remove_dir(f"dir_{i}"):
+            print(f"Удалена директория: {dir_name}")
+        else:
+            print(f"Такой директории не существует: {dir_name}")
+
+    list_current_dir()
+
+    if copy_current_script():
+        print("Создана копия файла")
+    else:
+        print("Что-то пошло не так")
