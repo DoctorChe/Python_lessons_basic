@@ -14,15 +14,9 @@
 # оформленные в виде соответствующих функций,
 # и импортированные в данный файл из easy.py
 
-
 import sys
 import os
 import hw05_easy
-
-try:
-    pass
-except ValueError:
-    pass
 
 while True:
     menu = "Выберите действие:\n \
@@ -41,12 +35,20 @@ while True:
             os.chdir(dir_name)
             print("Успешно перешел")
         except FileNotFoundError:
-            print(f"Невозможно перейти")
-    elif key == 2:
+            print("Невозможно перейти")
+    elif key == '2':
         hw05_easy.list_current_dir()
-    elif key == 3:
-        pass
-    elif key == 4:
-        pass
+    elif key == '3':
+        dir_name = input("Введите им директории: ")
+        if hw05_easy.remove_dir(dir_name):
+            print("Успешно удалено")
+        else:
+            print("Невозможно удалить")
+    elif key == '4':
+        dir_name = input("Введите им директории: ")
+        if hw05_easy.make_dir(dir_name):
+            print("Успешно создано")
+        else:
+            print("Невозможно создать")
     else:
         print("Неверная команда")
