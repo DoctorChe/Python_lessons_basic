@@ -18,12 +18,18 @@
 # python hw05_hard.py param1 param2 param3
 import os
 import sys
+import shutil
+
 print('sys.argv = ', sys.argv)
 
 
 def print_help():
     print("help - получение справки")
     print("mkdir <dir_name> - создание директории")
+    print("cp <file_name> - создает копию указанного файла")
+    print("rm <file_name> - удаляет указанный файл (запросить подтверждение операции)")
+    print("cd <full_path or relative_path> - меняет текущую директорию на указанную")
+    print("ls - отображение полного пути текущей директории")
     print("ping - тестовый ключ")
 
 
@@ -39,6 +45,68 @@ def make_dir():
         print('директория {} уже существует'.format(dir_name))
 
 
+def copy_file():
+    """
+    Создаёт копию файла, переданного параматром в скрипт
+    """
+
+    if not dir_name:
+        print("Необходимо указать имя файла вторым параметром")
+        return
+
+    try:
+        file_path = os.getcwd()
+        file_name = f"copy_{os.path.basename(dir_name)}"
+        file_full_name = os.path.join(file_path, file_name)
+        shutil.copyfile(dir_name, file_full_name)
+        print(f"Копия файла {dir_name} создана")
+    except Exception:
+        print("Что-то пошло не так")
+
+
+def remove_file():
+    """
+    Удаляет файл, переданный параматром в скрипт
+    """
+    if not dir_name:
+        print("Необходимо указать имя файла вторым параметром")
+        return
+
+    if input(f"Вы действительно хотите удалить файл: {dir_name}? (Y/N)").lower() == "y":
+        try:
+            file_full_name = os.path.join(os.getcwd(), dir_name)
+            os.remove(file_full_name)
+            print(f"Файл {dir_name} удалён")
+        except FileNotFoundError:
+            print(f"Файл {dir_name} не найден")
+
+
+def change_dir():
+    """
+    Меняет текущую директорию на указанную, переданную параматром в скрипт
+    """
+    if not dir_name:
+        print("Необходимо указать имя файла вторым параметром")
+        return
+
+    try:
+        if dir_name[0] == '/' or dir_name[0].isalpha():
+            os.chdir(dir_name)
+            print(f"Текущая директория сменена на {dir_name}")
+
+        # full_dir_name = os.path.join(os.getcwd(), dir_name)
+        # os.chdir(full_dir_name)
+    except FileNotFoundError:
+        print("Не верно задано имя директории")
+
+
+def full_dir_path():
+    """
+    Выводит полный путь текущей директории
+    """
+    print(os.getcwd())
+
+
 def ping():
     print("pong")
 
@@ -46,6 +114,10 @@ def ping():
 do = {
     "help": print_help,
     "mkdir": make_dir,
+    "cp": copy_file,
+    "rm": remove_file,
+    "cd": change_dir,
+    "ls": full_dir_path,
     "ping": ping
 }
 
