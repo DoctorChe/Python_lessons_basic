@@ -47,7 +47,7 @@ def make_dir():
 
 def copy_file():
     """
-    Создаёт копию файла, переданного параматром в скрипт
+    Создаёт копию файла, переданного параметром в скрипт
     """
 
     if not dir_name:
@@ -66,7 +66,7 @@ def copy_file():
 
 def remove_file():
     """
-    Удаляет файл, переданный параматром в скрипт
+    Удаляет файл, переданный параметром в скрипт
     """
     if not dir_name:
         print("Необходимо указать имя файла вторым параметром")
@@ -83,19 +83,15 @@ def remove_file():
 
 def change_dir():
     """
-    Меняет текущую директорию на указанную, переданную параматром в скрипт
+    Меняет текущую директорию на указанную, переданную параметром в скрипт
     """
     if not dir_name:
         print("Необходимо указать имя файла вторым параметром")
         return
 
     try:
-        if dir_name[0] == '/' or dir_name[0].isalpha():
-            os.chdir(dir_name)
-            print(f"Текущая директория сменена на {dir_name}")
-
-        # full_dir_name = os.path.join(os.getcwd(), dir_name)
-        # os.chdir(full_dir_name)
+        os.chdir(os.path.abspath(dir_name))
+        print(f"Текущая директория сменена на {os.getcwd()}")
     except FileNotFoundError:
         print("Не верно задано имя директории")
 
