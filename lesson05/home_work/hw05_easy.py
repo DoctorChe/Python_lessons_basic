@@ -55,13 +55,35 @@ def copy_current_script():
 
     import shutil
     try:
-        file_path = os.getcwd()
-        file_name = f"copy_{os.path.basename(__file__)}"
+        main_file_name = trace_main_file()
+        file_path = os.path.dirname(main_file_name)
+        file_name = f"copy_{os.path.basename(main_file_name)}"
+
+        # file_path = os.getcwd()
+        # file_name = f"copy_{os.path.basename(__file__)}"
+
         file_full_name = os.path.join(file_path, file_name)
-        shutil.copyfile(__file__, file_full_name)
+
+        # shutil.copyfile(__file__, file_full_name)
+        shutil.copyfile(main_file_name, file_full_name)
+
         return True
     except Exception:
         return False
+
+
+def trace_main_file():
+    """
+    Возвращает имя файла из которого был запущен данный скрипт
+    :return: Имя файла
+    """
+    import traceback
+    tr = traceback.extract_stack()
+    lst = traceback.format_list(tr)
+    first = lst[0].index('"')
+    second = lst[0].index('"', first + 1)
+    main_file = lst[0][first+1:second]
+    return main_file
 
 
 if __name__ == "__main__":
@@ -86,3 +108,5 @@ if __name__ == "__main__":
         print("Создана копия файла")
     else:
         print("Что-то пошло не так")
+
+    input("нажмите ввод")
