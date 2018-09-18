@@ -53,9 +53,6 @@ def copy_current_script():
     :return: True - успешно, False - завершилось ошибкой
     """
 
-    import inspect, os
-    print(inspect.getfile(inspect.currentframe()))
-
     import shutil
     try:
         file_path = os.getcwd()
