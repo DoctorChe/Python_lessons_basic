@@ -57,3 +57,147 @@
 модуль random: http://docs.python.org/3/library/random.html
 
 """
+import random
+
+
+class Draw:
+    def __init__(self):
+        self.draw = []
+        self.clean = self.draw.count(-1) == 15
+
+    def new_draw(self):
+        seq = random.sample(range(1, 91), k=15)
+        line1 = self.new_line(seq[0:5])
+        line2 = self.new_line(seq[5:10])
+        line3 = self.new_line(seq[10:15])
+        self.draw = line1 + line2 + line3
+
+    @staticmethod
+    def new_line(line):
+        line.sort()
+        line.insert(random.randint(0, 5), 0)
+        line.insert(random.randint(0, 6), 0)
+        line.insert(random.randint(0, 7), 0)
+        line.insert(random.randint(0, 8), 0)
+        return line
+
+    @staticmethod
+    def print_line(line):
+        new_line = ""
+        for number in line:
+            if number == -1:
+                number = '-'
+            if number == 0:
+                number = ''
+            new_line += str(number) + "\t"
+        return new_line
+
+    def print_draw(self):
+        print(self.print_line(self.draw[0:9]))
+        print(self.print_line(self.draw[9:18]))
+        print(self.print_line(self.draw[18:27]))
+
+    def check_number(self, number):
+        if number in self.draw:
+            index = self.draw.index(number)
+            self.draw.pop(index)
+            self.draw.insert(index, -1)
+            return True
+        return False
+
+
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.draw = []
+
+    def take_draw(self):
+        self.draw = Draw()
+        self.draw.new_draw()
+
+    def check_draw(self, number):
+        return self.draw.check_number(number)
+
+    def print_draw(self):
+        self.draw.print_draw()
+
+
+class You(Player):
+
+    def __init__(self, name="Игрок"):
+        your_name = input("Введите ваше имя")
+        if your_name:
+            name = your_name
+        Player.__init__(self, name)
+        print(f"Добро пожаловать в игру {self.name}")
+
+    def print_draw(self):
+        print("---------- Ваша карточка ---------")
+        self.draw.print_draw()
+        print("----------------------------------")
+
+
+class Computer(Player):
+
+    def __init__(self, name="Компьютер"):
+        Player.__init__(self, name)
+
+    def print_draw(self):
+        print("------- Карточка компьютера ------")
+        self.draw.print_draw()
+        print("----------------------------------")
+
+
+class Lotto:
+    def __init__(self):
+        self.player = You()
+        self.comp = Computer()
+        self.barrels = []
+        self.game = True
+
+    def start_game(self):
+        self.player.take_draw()
+        self.player.print_draw()
+        self.comp.take_draw()
+        self.comp.print_draw()
+        self.generate_barrels()
+
+    def generate_barrels(self):
+        barrels = [x for x in range(1, 91)]
+        random.shuffle(barrels)
+        # self.barrels = barrels
+        self.barrels.extend(barrels)
+
+    def play_round(self):
+        number = self.barrels.pop()
+        print(f"Новый бочонок: {number} (осталось {len(self.barrels)})")
+        take_barrel = input("Зачеркнуть цифру? (y/n)").lower() == 'y'
+        if take_barrel:
+            if self.player.check_draw(number):
+                print("Вы зачеркнули цифру")
+            else:
+                print("Вы проиграли, нет такой цифры на поле")
+                self.game = False
+        else:
+            print("Вы пропустили ход")
+            if self.player.check_draw(number):
+                print("Вы проиграли, на поле была такая цифра")
+                self.game = False
+        if self.comp.check_draw(number):
+            print("Компьютер зачеркнул цифру")
+        else:
+            print("Компьютер пропустил ход")
+        self.player.print_draw()
+        self.comp.print_draw()
+        if self.player.draw.clean:
+            print("Вы выиграли")
+            self.game = False
+        if self.comp.draw.clean:
+            print("Компьютер выиграл")
+            self.game = False
+
+
+game = Lotto()
+game.start_game()
+while game.game:
+    game.play_round()
