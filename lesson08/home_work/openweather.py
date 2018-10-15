@@ -123,3 +123,21 @@ OpenWeatherMap — онлайн-сервис, который предостав�
 
 """
 
+import urllib
+import urllib.request
+import gzip
+
+
+def get_cities():
+    url = "http://bulk.openweathermap.org/sample/city.list.json.gz"
+    destination_gz = "city.list.json.gz"
+    destination_json = "city.list.json"
+    urllib.request.urlretrieve(url, destination_gz)
+    # gzip.decompress(destination)
+    with gzip.open(destination_gz, 'rb') as fin:
+        with open(destination_json, "wb") as fout:
+            fout.write(fin.read())
+
+
+if __name__ == "__main__":
+    get_cities()
