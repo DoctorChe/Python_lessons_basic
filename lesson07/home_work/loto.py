@@ -109,10 +109,9 @@ class Draw:
 class Player:
     def __init__(self, name):
         self.name = name
-        self.draw = []
+        self.draw = Draw()
 
     def take_draw(self):
-        self.draw = Draw()
         self.draw.new_draw()
 
     def check_draw(self, number):
@@ -165,8 +164,7 @@ class Lotto:
     def generate_barrels(self):
         barrels = [x for x in range(1, 91)]
         random.shuffle(barrels)
-        # self.barrels = barrels
-        self.barrels.extend(barrels)
+        self.barrels = barrels
 
     def play_round(self):
         number = self.barrels.pop()
