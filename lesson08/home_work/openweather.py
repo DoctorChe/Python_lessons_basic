@@ -1,5 +1,4 @@
-
-""" 
+"""
 == OpenWeatherMap ==
 
 OpenWeatherMap — онлайн-сервис, который предоставляет бесплатный API
@@ -126,18 +125,252 @@ OpenWeatherMap — онлайн-сервис, который предостав�
 import urllib
 import urllib.request
 import gzip
+import json
+import sqlite3
+from pathlib import Path
+
+DB_PATH = "database.db"
+JSON_PATH = "city.list.json"
 
 
-def get_cities():
-    url = "http://bulk.openweathermap.org/sample/city.list.json.gz"
-    destination_gz = "city.list.json.gz"
-    destination_json = "city.list.json"
-    urllib.request.urlretrieve(url, destination_gz)
-    # gzip.decompress(destination)
-    with gzip.open(destination_gz, 'rb') as fin:
-        with open(destination_json, "wb") as fout:
-            fout.write(fin.read())
+def get_appid():
+    with open("app.id", "r") as f:
+        appid = f.read()
+    return appid
+
+
+def get_cities_archive():
+    destination_gz = JSON_PATH + ".gz"
+    city_list_json_gz_file = Path(destination_gz)
+    if city_list_json_gz_file.is_file():
+        print("Файл со списком городов существует")
+    else:
+        url = "http://bulk.openweathermap.org/sample/city.list.json.gz"
+        # destination_gz = "city.list.json.gz"
+        # destination_json = "city.list.json"
+        urllib.request.urlretrieve(url, destination_gz)
+        # gzip.decompress(destination)
+        with gzip.open(destination_gz, "rb") as fin:
+            # with open(destination_json, "wb") as fout:
+            with open(JSON_PATH, "wb") as fout:
+                fout.write(fin.read())
+
+
+def get_weather(d):
+    params = urllib.parse.urlencode(d)
+    url = f"http://api.openweathermap.org/data/2.5/weather?{params}"
+    with urllib.request.urlopen(url) as f:
+        json_string = f.read().decode('utf-8')
+        parsed_string = json.loads(json_string)
+        return {
+            "id_города": parsed_string['id'],
+            "Город": parsed_string['name'],
+            "Дата": parsed_string['dt'],
+            "Температура": parsed_string['main']['temp'],
+            "id_погоды": parsed_string['weather'][0]['id']
+        }
+
+
+def get_countries():
+    countries = set()
+    with open(JSON_PATH, "r", encoding="UTF-8") as json_data:
+        cities = json.load(json_data)
+    for city in cities:
+        countries.add(city["country"])
+    return countries
+
+
+def get_cities(country):
+    cities_in_country = set()
+    with open(JSON_PATH, "r", encoding="UTF-8") as json_data:
+        cities = json.load(json_data)
+    for city in cities:
+        if city["country"] == country:
+            cities_in_country.add(city["name"])
+    return cities_in_country
+
+
+def find_city(**kwargs):
+    with open(JSON_PATH, "r", encoding="UTF-8") as json_data:
+        cities = json.load(json_data)
+    for city in cities:
+        if city["name"] == kwargs["name"] and city["country"] == kwargs["country"]:
+            return city["id"]
+
+
+def make_db_file():
+    db_file = Path(DB_PATH)
+    if db_file.is_file():
+        print("Файл базы данных существует")
+    else:
+        try:
+            file = open(DB_PATH, 'w')
+            print("Файл базы данных содан")
+            file.close()
+        except IOError:
+            print("Не удалось создать файл базы данных")
+
+
+class DataConn:
+    """
+    Класс Context Manager
+    Создает связь с базой данных SQLite и закрывает её по окончанию работы
+    """
+
+    def __init__(self, db_name):
+        """Конструктор"""
+        self.db_name = db_name
+        self.conn = None
+
+    def __enter__(self):
+        """Открываем подключение к базе данных"""
+        self.conn = sqlite3.connect(self.db_name)
+        return self.conn
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Закрываем подключение"""
+        self.conn.close()
+        if exc_val:
+            raise Exception
+
+
+def create_table():
+    """Создание базы данных"""
+    with DataConn(DB_PATH) as conn:
+        with conn:
+            cursor = conn.cursor()
+            # Создание таблицы "Погода"
+            cursor.execute("""
+                              CREATE TABLE IF NOT EXISTS weather
+                              (id_города INTEGER PRIMARY KEY,
+                              Город VARCHAR(255),
+                              Дата DATE,
+                              Температура INTEGER,
+                              id_погоды TEXT)
+                           """)
+
+
+def copy_from_json_to_db(weather):
+    """Запись данных в базу данных"""
+
+    # id_города = weather["id_города"]
+    # Город = weather["Город"]
+    # Дата = weather["Дата"]
+    # Температура = weather["Температура"]
+    # id_погоды = weather["id_погоды"]
+
+    weather_insert = (
+        weather["id_города"],
+        weather["Город"],
+        weather["Дата"],
+        weather["Температура"],
+        weather["id_погоды"],
+    )
+    weather_update = (
+        weather["Город"],
+        weather["Дата"],
+        weather["Температура"],
+        weather["id_погоды"],
+        weather["id_города"],
+    )
+
+    sql = (
+           "SELECT * FROM weather WHERE id_города=?",
+           "INSERT INTO weather VALUES (?,?,?,?,?)",
+           "UPDATE weather SET Город=?, Дата=?, Температура=?, id_погоды=? WHERE id_города=?",
+           )
+
+    # conn = sqlite3.connect(DB_PATH)
+    # cursor = conn.cursor()
+    # cursor.execute(sql[0], [id_города, ])
+    # if not cursor.fetchall():  # проверка на существование идентичной записи
+    #     print("Данных не существует, вносим данные")
+    #     cursor.execute(sql[1], weather)  # Внесение данных в таблицу
+    # else:
+    #     print("Данные существуют, изменяем данные")
+    #     cursor.execute(sql[2], (Город, Дата, Температура, id_погоды, id_города))  # Изменение данных в таблице
+    #
+    # cursor.close()
+    # conn.close()
+
+    with DataConn(DB_PATH) as conn:
+        with conn:
+            cursor = conn.cursor()
+            create_table()  # Создать таблицу, если не существует
+            cursor.execute(sql[0], (weather["id_города"], ))
+            if not cursor.fetchall():  # проверка на существование идентичной записи
+                print("Данных не существует, вносим данные")
+                cursor.execute(sql[1], weather_insert)  # Внесение данных в таблицу
+            else:
+                print("Данные существуют, изменяем данные")
+                cursor.execute(sql[2], weather_update)  # Изменение данных в таблице
+
+            cursor.execute("SELECT * FROM weather")
+            print(cursor.fetchall())
+
+    # query = """
+    #     INSERT INTO weather (id_города, Город, Дата, Температура, id_погоды)
+    #         VALUES(id_города, Город, Дата, Температура, id_погоды)
+    #         ON CONFLICT(id_города)
+    #         DO UPDATE SET (
+    #         Город=excluded.Город,
+    #         Дата=excluded.Дата,
+    #         Температура=excluded.Температура,
+    #         id_погоды=excluded.id_погоды
+    #         );
+    # """
+
+    # weather = json.load(open(JSON_PATH))
+    # db = sqlite3.connect(DB_PATH)
+    # query = "INSERT OR IGNORE INTO weather VALUES (?,?,?,?,?)"
+    # # query = """
+    # #     INSERT INTO weather (user_name, age)
+    # #         VALUES('steven', 32)
+    # #         ON CONFLICT(user_name)
+    # #         DO UPDATE SET age=excluded.age;"""
+    # columns = ['id_города', 'Город', 'Дата', 'Температура', 'id_погоды']
+    # for data in weather():
+    #     keys = tuple(data[col] for col in columns)
+    #     c = db.cursor()
+    #     c.execute(query, keys)
+    #     c.close()
 
 
 if __name__ == "__main__":
-    get_cities()
+    make_db_file()
+    get_cities_archive()
+    countries = sorted(get_countries())
+    print(countries)
+    while True:
+        country = input("Введите название стараны из списка: ")
+        if country in countries:
+            break
+    cities = sorted(get_cities(country))
+    print(cities)
+    while True:
+        city = input("Введите название города из списка: ")
+        if city in cities:
+            break
+        else:
+            match_cities = []
+            for c in cities:
+                if c.startswith(city):
+                    match_cities.append(c)
+            if match_cities:
+                if len(match_cities) == 1:
+                    city = match_cities[0]
+                    break
+                else:
+                    print(f"Список подходящих городов:\n{match_cities}")
+            else:
+                print("Не найдено такого города")
+    city_id = find_city(name=city, country=country)
+    # city_id = find_city(name="State of Haryāna", country="IN")
+    d = {}  # Словарь с параметрами для запроса погоды
+    d["appid"] = get_appid()
+    d["id"] = city_id
+    d["units"] = "metric"
+    # get_weather(d)
+    weather = get_weather(d)
+    print(weather)
+    copy_from_json_to_db(weather)
